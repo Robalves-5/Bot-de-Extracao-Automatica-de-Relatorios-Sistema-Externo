@@ -1,0 +1,52 @@
+# 🤖 Bot de Extração Automática de Relatórios de Cashback
+
+Este projeto automatiza a extração de relatórios de cashback de um sistema web interno. Utilizando Selenium, o bot realiza login, aplica filtros específicos (como mês e tipo de comissão), faz o download de relatórios para cada parceiro listado em uma planilha, organiza os arquivos em pastas separadas com base no percentual de cashback, e por fim compila os dados em um único arquivo consolidado para cada grupo.
+
+---
+
+## 📌 Funcionalidades
+
+- Autenticação automática no sistema.
+- Navegação por menus e abas usando XPATHs.
+- Aplicação de filtros por mês, tipo de relatório e nome do parceiro.
+- Download automático de relatórios em `.xlsx`.
+- Renomeação e organização dos arquivos por cashback (`50%` ou `100%`).
+- Compilação dos arquivos em um único relatório final por pasta.
+
+---
+
+## 📁 Estrutura do Projeto
+
+📦 bot-relatorios-cashback ├── files/ # Pasta para arquivos auxiliares ├── config/ # Configurações opcionais ├── Relatorios-extraidos-cashback/ │ ├── Relatórios Cashback 50%/ # Arquivos com cashback de 50% │ └── Relatórios Cashback 100%/ # Arquivos com cashback de 100% ├── script.py # Script principal ├── .env # Variáveis de ambiente (email e senha) ├── requirements.txt # Dependências do projeto └── README.md # Documentação do projeto
+
+
+---
+
+## ⚙️ Requisitos
+
+- Python 3.10 ou superior
+- Google Chrome instalado
+- [ChromeDriver](https://chromedriver.chromium.org/downloads) compatível com sua versão do navegador
+- Permissões de acesso ao sistema e credenciais válidas
+- Planilha Excel contendo:
+  - Coluna `Parceiros`: nomes a serem buscados no sistema
+  - Coluna `Cashback`: valor associado a cada parceiro (ex: `0.5` ou `1.0`)
+
+---
+
+## 🧪 Tecnologias Utilizadas
+
+- [Selenium](https://selenium.dev) – automação do navegador
+- [Pandas](https://pandas.pydata.org/) – leitura e manipulação de planilhas
+- [Python-dotenv](https://pypi.org/project/python-dotenv/) – carregamento de variáveis de ambiente
+- [Logging](https://docs.python.org/3/library/logging.html) – registro de logs e erros
+
+---
+
+## 🔒 Configuração
+
+Crie um arquivo `.env` na raiz do projeto com as credenciais de acesso ao sistema:
+
+```env
+EMAIL=seu_usuario@dominio.com
+PASSWORD=sua_senha
