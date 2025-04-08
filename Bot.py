@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger()
 
 # Carregar variáveis de ambiente
-dotenv_path_env = r'Z:\Comissionamento\20 - AUTÔNOMOS\60 - LUCAS KANG\01 - KANG BOTS\.env'
+dotenv_path_env = r'[CAMINHO_DO_ARQUIVO_ENV]'
 load_dotenv(dotenv_path=dotenv_path_env)
 time.sleep(1)
 
@@ -29,22 +29,21 @@ if not EMAIL or not PASSWORD:
 time.sleep(1)
 
 # Carregar lista de parceiros e cashback da planilha
-name_path = r"Z:\Comissionamento\20 - AUTÔNOMOS\2024\09 - Setembro\Financeiro\Cashback - Nomes sistema.xlsx"
+name_path = r"[CAMINHO_DA_PLANILHA]"
 df = pd.read_excel(name_path)
 time.sleep(1)
 
-# Verificar se as colunas "Parceiros" e "Cashback" existem
+# Verificar se as colunas necessárias existem
 if "Parceiros" not in df.columns or "Cashback" not in df.columns:
     logger.error("Erro: A planilha não contém as colunas 'Parceiros' e 'Cashback'.")
     exit(10)
 time.sleep(1)
 
-# Lista
 lista = df["Parceiros"].tolist()
 time.sleep(1)
 
 # Diretório de download
-download_directory = r'Z:\Comissionamento\20 - AUTÔNOMOS\60 - LUCAS KANG\01 - KANG BOTS\Relatorios-extraidos-cashback'
+download_directory = r'[CAMINHO_DIRETORIO_DOWNLOAD]'
 time.sleep(1)
 
 # Criar pastas
@@ -74,7 +73,7 @@ driver = webdriver.Chrome(options=chrome_options)
 time.sleep(2)
 
 # Acessar a página de login
-driver.get("https://backofficeweb.genialinvestimentos.com.br/comissao/competencia")
+driver.get("[URL_PRIVADA_REMOVIDA]")
 time.sleep(3)
 
 # Fazer login
@@ -82,58 +81,45 @@ email = driver.find_element(By.ID, "userLogin")
 password = driver.find_element(By.ID, "input_0")
 email.send_keys(EMAIL)
 password.send_keys(PASSWORD)
-login_button = driver.find_element(By.XPATH, "/html/body/div/div/section/section/md-card-content/form/div[2]/md-input-container/button")
+login_button = driver.find_element(By.XPATH, "[XPATH_LOGIN_BUTTON]")
 login_button.click()
 time.sleep(3)
 
-# Navegar para as seções necessárias
-comissao_button = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/section/md-content/ul/li[6]/div")
-comissao_button.click()
+# Navegação até a aba de Cashback
+driver.find_element(By.XPATH, "[XPATH_COMISSAO_BUTTON]").click()
 time.sleep(3)
 
-# Selecionar a aba de Cashback
-titulo_button = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/section/md-content/div[1]/div[2]/md-tabs/md-tabs-wrapper/md-tabs-canvas/md-pagination-wrapper/md-tab-item[3]")
-titulo_button.click()
+driver.find_element(By.XPATH, "[XPATH_ABA_CASHBACK]").click()
 time.sleep(3)
 
-# Selecionar o mês "Janeiro"
-selected_click = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/section/md-content/div[2]/div/md-content/div[2]/div/div[1]/div/md-input-container[2]")
-selected_click.click()
+# Selecionar mês e tipo de campo
+driver.find_element(By.XPATH, "[XPATH_MES]").click()
 time.sleep(3)
 
-selected_mes = driver.find_element(By.XPATH, "//md-option/div[contains(text(), 'Janeiro')]")
-selected_mes.click()
+driver.find_element(By.XPATH, "//md-option/div[contains(text(), 'Janeiro')]").click()
 time.sleep(3)
 
-# Selecionar o campo "Cashback"
-selected_campo = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/section/md-content/div[2]/div/md-content/div[2]/div/div[1]/div/md-input-container[3]/md-select")
-selected_campo.click()
+driver.find_element(By.XPATH, "[XPATH_CAMPO]").click()
 time.sleep(3)
 
-cashback_button = driver.find_element(By.XPATH, "//div[@class='md-text' and text()='Cashback']")
-cashback_button.click()
+driver.find_element(By.XPATH, "//div[@class='md-text' and text()='Cashback']").click()
 time.sleep(3)
 
-# Selecionar o parceiro
-parceiro = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/section/md-content/div[2]/div/md-content/div[2]/div/div[4]/div[1]/md-chips/md-chips-wrap/div/div/md-autocomplete/md-autocomplete-wrap/input")
+# Campo do parceiro
+parceiro = driver.find_element(By.XPATH, "[XPATH_CAMPO_PARCEIRO]")
 parceiro.click()
 time.sleep(3)
 
-
-# Função principal para processar os parceiros
+# Função principal
 def processar_parceiro(lista):
-
     def mover_para_pasta_correcta(file_path, cashback, nome_arquivo):
-        if cashback == "50%":
-            novo_caminho = os.path.join(folder_50, nome_arquivo)
+        destino = folder_50 if cashback == "50%" else folder_100 if cashback == "100%" else None
+        if destino:
+            novo_caminho = os.path.join(destino, nome_arquivo)
             os.rename(file_path, novo_caminho)
-            logger.info(f"Arquivo movido para a pasta Relatórios Cashback 50%: {nome_arquivo}")
-        elif cashback == "100%":
-            novo_caminho = os.path.join(folder_100, nome_arquivo)
-            os.rename(file_path, novo_caminho)
-            logger.info(f"Arquivo movido para a pasta Relatórios Cashback 100%: {nome_arquivo}")
+            logger.info(f"Arquivo movido para: {novo_caminho}")
         else:
-            logger.error(f"Cashback {cashback} não reconhecido para o parceiro. Ignorando o arquivo {nome_arquivo}.")
+            logger.error(f"Cashback '{cashback}' não reconhecido para: {nome_arquivo}")
 
     for nome in lista:
         try:
@@ -141,12 +127,10 @@ def processar_parceiro(lista):
             parceiro.send_keys(nome)
             time.sleep(3)
 
-            submit_button = driver.find_element(By.XPATH, "/html/body/md-virtual-repeat-container[4]")
-            submit_button.click()
+            driver.find_element(By.XPATH, "[XPATH_SUBMIT]").click()
             time.sleep(3)
 
-            extrair_button = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/section/md-content/div[2]/div/md-content/div[2]/div/div[4]/div[2]/div[1]/button")
-            extrair_button.click()
+            driver.find_element(By.XPATH, "[XPATH_EXTRACAO]").click()
             time.sleep(10)
 
             files = os.listdir(download_directory)
@@ -157,62 +141,52 @@ def processar_parceiro(lista):
             new_file_name = f"Relatório-cashback-{nome}.xlsx"
             new_file_path = os.path.join(download_directory, new_file_name)
             os.rename(temp_download_path, new_file_path)
-            logger.info(f"Relatório extraído e renomeado para: {new_file_name}")
+            logger.info(f"Arquivo salvo como: {new_file_name}")
             time.sleep(3)
 
             parceiro_cashback = df[df["Parceiros"].str.strip() == nome.strip()]
             if parceiro_cashback.empty:
-                logger.error(f"Parceiro {nome} não encontrado na planilha de Cashback.")
+                logger.error(f"Parceiro {nome} não encontrado na planilha.")
                 continue
 
             cashback = str(parceiro_cashback["Cashback"].iloc[0]).strip()
-            logger.info(f"Cashback para {nome}: {cashback}")
-
-            if cashback == "0.5":
-                cashback = "50%"
-            elif cashback == "1.0":
-                cashback = "100%"
-            else:
-                logger.error(f"Cashback {cashback} não reconhecido para o parceiro {nome}.")
-                continue
+            if cashback == "0.5": cashback = "50%"
+            elif cashback == "1.0": cashback = "100%"
 
             mover_para_pasta_correcta(new_file_path, cashback, new_file_name)
             time.sleep(3)
         except NoSuchElementException:
-            logger.info(f"Nenhuma opção encontrada para o parceiro {nome}. Tentando o próximo parceiro.")
+            logger.info(f"Nenhuma opção encontrada para o parceiro {nome}.")
             continue
         except Exception as e:
-            logger.error(f"Erro ao processar o parceiro {nome}: {e}")
+            logger.error(f"Erro com parceiro {nome}: {e}")
         finally:
             time.sleep(3)
             try:
-                remove_button = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/section/md-content/div[2]/div/md-content/div[2]/div/div[4]/div[1]/md-chips/md-chips-wrap/md-chip/div[2]/button")
-                remove_button.click()
-                logger.info(f"Parceiro {nome} removido da lista de seleção.")
+                driver.find_element(By.XPATH, "[XPATH_REMOVER_PARCEIRO]").click()
+                logger.info(f"Parceiro {nome} removido da seleção.")
             except NoSuchElementException:
-                logger.error(f"Não foi possível encontrar o botão de remover para o parceiro {nome}.")
+                logger.warning(f"Não foi possível remover {nome}.")
             time.sleep(3)
 
-# Processar a lista de parceiros
+# Processar parceiros
 processar_parceiro(lista)
 
-# Finalizar o driver
+# Finalizar navegador
 driver.quit()
 time.sleep(5)
 
-# Função para compilar arquivos dentro de uma pasta
+# Compilar arquivos
 def compilar_arquivos_na_pasta(pasta):
-    all_files = [os.path.join(pasta, f) for f in os.listdir(pasta) if f.endswith('.xlsx')]
-    if not all_files:
-        logger.error(f"Nenhum arquivo de relatório encontrado na pasta {pasta}.")
+    arquivos = [os.path.join(pasta, f) for f in os.listdir(pasta) if f.endswith('.xlsx')]
+    if not arquivos:
+        logger.error(f"Nenhum arquivo encontrado na pasta {pasta}.")
         return
-    df_list = [pd.read_excel(file) for file in all_files]
-    compiled_df = pd.concat(df_list)
-    compiled_file_path = os.path.join(pasta, f"Compilado_{os.path.basename(pasta)}.xlsx")
-    compiled_df.to_excel(compiled_file_path, index=False)
-    logger.info(f"Todos os arquivos da pasta {pasta} foram compilados em {compiled_file_path}")
+    df_final = pd.concat([pd.read_excel(arq) for arq in arquivos])
+    caminho_saida = os.path.join(pasta, f"Compilado_{os.path.basename(pasta)}.xlsx")
+    df_final.to_excel(caminho_saida, index=False)
+    logger.info(f"Arquivo compilado salvo em {caminho_saida}")
 
-# Compilar os arquivos
 compilar_arquivos_na_pasta(folder_50)
 time.sleep(3)
 compilar_arquivos_na_pasta(folder_100)
